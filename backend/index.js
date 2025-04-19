@@ -1,16 +1,13 @@
-// packages
 import path from "path";
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import fs from "fs";
 
-
-// Utiles
+// Utilities
 import connectDB from "./config/db.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
-// import uploadRoutes from "./routes/uploadRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 
 dotenv.config();
@@ -24,24 +21,41 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-
+// API routes
 app.use("/api/category", categoryRoutes);
 app.use("/api/products", productRoutes);
-// app.use("/api/upload", uploadRoutes);
 app.use("/api/orders", orderRoutes);
 
 app.get("/api/config/paypal", (req, res) => {
   res.send({ clientId: process.env.PAYPAL_CLIENT_ID });
 });
 
-
-const __dirname = path.resolve();
-app.use("/uploads", express.static(path.join(__dirname, "backend/uploads")));
-
+// Serve uploads directory (create if it doesn't exist)
+const uploadDir = path.join(__dirname, "backend/uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+app.use("/uploads", express.static(uploadDir));
 
 // Serve static files from the frontend build folder
-const frontendDir = path.join(__dirname, 'path/to/frontend/dist');
+const frontendDir = path.resolve(__dirname, '../frontend/dist');
+if (!fs.existsSync(frontendDir)) {
+  console.error(`Frontend dist directory not found at ${frontendDir}`);
+}
 app.use(express.static(frontendDir));
+
+// Debug endpoint to check frontend directory
+app.get('/debug', (req, res) => {
+  const frontendBaseDir = path.join(__dirname, '../frontend');
+  const distDir = path.join(__dirname, '../frontend/dist');
+  fs.readdir(frontendBaseDir, (err, frontendFiles) => {
+    if (err) return res.send({ error: 'Frontend dir not found', message: err.message });
+    fs.readdir(distDir, (err, distFiles) => {
+      if (err) return res.send({ frontendFiles, distError: err.message });
+      res.send({ frontendFiles, distFiles });
+    });
+  });
+});
 
 // Test API route
 app.get('/api', (req, res) => {
@@ -58,15 +72,4 @@ app.get('*', (req, res) => {
   res.sendFile(filePath);
 });
 
-app.get('/debug', (req, res) => {
-  const frontendBaseDir = path.join(__dirname, '../frontend');
-  const distDir = path.join(__dirname, '../frontend/dist');
-  fs.readdir(frontendBaseDir, (err, frontendFiles) => {
-    if (err) return res.send({ error: 'Frontend dir not found', message: err.message });
-    fs.readdir(distDir, (err, distFiles) => {
-      if (err) return res.send({ frontendFiles, distError: err.message });
-      res.send({ frontendFiles, distFiles });
-    });
-  });
-});
 app.listen(port, () => console.log(`Server running on port: ${port}`));
