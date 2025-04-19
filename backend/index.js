@@ -40,7 +40,7 @@ app.use("/uploads", express.static(path.join(__dirname, "backend/uploads")));
 
 
 // Serve static files from the frontend build folder
-const frontendDir = path.join(__dirname, '../frontend/dist');
+const frontendDir = path.join(__dirname, 'path/to/frontend/dist');
 app.use(express.static(frontendDir));
 
 // Test API route
@@ -52,8 +52,21 @@ app.get('/api', (req, res) => {
 app.get('*', (req, res) => {
   const filePath = path.join(frontendDir, 'index.html');
   if (!fs.existsSync(filePath)) {
+    console.error(`Frontend index.html not found at ${filePath}`);
     return res.status(404).send('Frontend build not found. Please run npm run build in the frontend directory.');
   }
   res.sendFile(filePath);
+});
+
+app.get('/debug', (req, res) => {
+  const frontendBaseDir = path.join(__dirname, '../frontend');
+  const distDir = path.join(__dirname, '../frontend/dist');
+  fs.readdir(frontendBaseDir, (err, frontendFiles) => {
+    if (err) return res.send({ error: 'Frontend dir not found', message: err.message });
+    fs.readdir(distDir, (err, distFiles) => {
+      if (err) return res.send({ frontendFiles, distError: err.message });
+      res.send({ frontendFiles, distFiles });
+    });
+  });
 });
 app.listen(port, () => console.log(`Server running on port: ${port}`));
