@@ -3,6 +3,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import fs from "fs";
+import { fileURLToPath } from "url"; // Add this for ESM path resolution
 
 // Utilities
 import connectDB from "./config/db.js";
@@ -12,6 +13,10 @@ import orderRoutes from "./routes/orderRoutes.js";
 
 dotenv.config();
 const port = process.env.PORT || 5000;
+
+// ESM path resolution
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 connectDB();
 
