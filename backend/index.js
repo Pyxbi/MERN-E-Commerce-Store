@@ -3,7 +3,7 @@ import path from "path";
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import cors from "cors";
+
 
 // Utiles
 import connectDB from "./config/db.js";
@@ -33,13 +33,22 @@ app.get("/api/config/paypal", (req, res) => {
   res.send({ clientId: process.env.PAYPAL_CLIENT_ID });
 });
 
-// Enable CORS
-app.use(cors({
-  origin: "http://localhost:5174", // Allow frontend URL (adjust if needed)
-  credentials: true, // Allow cookies to be sent (if needed)
-}));
 
 const __dirname = path.resolve();
 app.use("/uploads", express.static(path.join(__dirname, "backend/uploads")));
+
+
+// Serve static files from the frontend build folder
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+// API routes
+app.get('/api', (req, res) => {
+  res.json({ message: 'API is working' });
+});
+
+// Serve index.html for all other routes (for client-side routing)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/dist', 'index.html'));
+});
 
 app.listen(port, () => console.log(`Server running on port: ${port}`));
