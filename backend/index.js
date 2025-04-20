@@ -36,15 +36,12 @@ app.get("/api/config/paypal", (req, res) => {
 });
 
 // Serve uploads directory (create if it doesn't exist)
-const uploadDir = path.join(__dirname, "backend/uploads");
+const uploadDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 // In backend/index.js, update the uploads section
-app.use("/uploads", (req, res, next) => {
-  console.log(`Requested: /uploads${req.path}`);
-  express.static(uploadDir)(req, res, next);
-});
+app.use("/uploads", express.static(uploadDir));
 
 // Serve static files from the frontend build folder
 const frontendDir = path.resolve(__dirname, '../frontend/dist');
