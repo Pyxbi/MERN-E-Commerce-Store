@@ -25,7 +25,7 @@ const ProductCard = ({ p }) => {
           </span>
           <img
             className="cursor-pointer w-full"
-            src={product.image} 
+            src={p.image} 
             alt={p.name}
             style={{ height: "170px", objectFit: "cover" }}
           />
@@ -40,7 +40,7 @@ const ProductCard = ({ p }) => {
           <p className="text-black font-semibold text-pink-500">
             {p?.price?.toLocaleString("en-US", {
               style: "currency",
-              currency: "USD",
+              currency: "VND",
             })}
           </p>
         </div>
