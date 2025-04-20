@@ -40,7 +40,11 @@ const uploadDir = path.join(__dirname, "backend/uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
-app.use("/uploads", express.static(uploadDir));
+// In backend/index.js, update the uploads section
+app.use("/uploads", (req, res, next) => {
+  console.log(`Requested: /uploads${req.path}`);
+  express.static(uploadDir)(req, res, next);
+});
 
 // Serve static files from the frontend build folder
 const frontendDir = path.resolve(__dirname, '../frontend/dist');
